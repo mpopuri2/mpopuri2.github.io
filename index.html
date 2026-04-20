@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manjunath Popuri - AI/ML Engineer &amp; Data Scientist</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@300;400;600;700;800&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#03070f; --surface:#070d1a; --card:#0b1220;
+  --green:#00ff9d; --blue:#00c8ff; --purple:#a855f7; --orange:#ff6b35;
+  --white:#e8f0fe; --muted:#4a5568; --muted2:#718096;
+  --border:rgba(0,255,157,0.08); --border2:rgba(0,200,255,0.1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{background:var(--bg);color:var(--white);font-family:'Syne',sans-serif;cursor:none;overflow-x:hidden;}
+
+#cur{position:fixed;top:0;left:0;z-index:9999;pointer-events:none;}
+#cur-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);transform:translate(-50%,-50%);position:absolute;transition:width .15s,height .15s;}
+#cur-ring{width:32px;height:32px;border-radius:50%;border:1px solid rgba(0,255,157,0.4);transform:translate(-50%,-50%);position:absolute;transition:width .2s,height .2s;}
+body.hov #cur-dot{width:12px;height:12px;background:var(--blue);box-shadow:0 0 18px var(--blue);}
+body.hov #cur-ring{width:52px;height:52px;border-color:rgba(0,200,255,0.5);}
+
+#bg-canvas{position:fixed;inset:0;z-index:0;opacity:0.5;}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,255,157,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,157,0.025) 1px,transparent 1px);
+  background-size:60px 60px;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:22px 64px;background:rgba(3,7,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Fira Code',monospace;font-size:14px;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.nav-logo::before{content:'> ';color:var(--muted2);}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;color:var(--muted2);text-decoration:none;transition:color .3s;font-family:'Space Mono',monospace;}
+.nav-links a:hover{color:var(--green);}
+.nav-status{display:flex;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:11px;color:var(--muted2);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite;}
+
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(3,7,15,0.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--card);border:1px solid var(--border2);max-width:720px;width:100%;max-height:88vh;overflow-y:auto;position:relative;clip-path:polygon(0 0,calc(100% - 28px) 0,100% 28px,100% 100%,28px 100%,0 calc(100% - 28px));transform:translateY(24px);transition:transform .35s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal.health{border-color:rgba(0,200,255,0.2);}
+.modal-header{padding:44px 48px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1;}
+.modal-domain{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:3px;margin-bottom:14px;}
+.modal-title{font-size:26px;font-weight:800;line-height:1.2;}
+.modal-close{position:absolute;top:20px;right:24px;width:36px;height:36px;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .3s,color .3s;}
+.modal-close:hover{border-color:var(--green);color:var(--white);}
+.modal-body{padding:36px 48px 48px;}
+.modal-section{margin-bottom:32px;}
+.modal-section-title{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.modal-section-title::before{content:'//';color:var(--muted);}
+.modal.health .modal-section-title{color:var(--blue);}
+.modal-desc{font-family:'Space Mono',monospace;font-size:12px;line-height:2;color:var(--muted2);}
+.modal-highlights{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.modal-highlights li{font-family:'Space Mono',monospace;font-size:12px;line-height:1.8;color:var(--muted2);padding-left:20px;position:relative;}
+.modal-highlights li::before{content:'▹';position:absolute;left:0;color:var(--green);}
+.modal.health .modal-highlights li::before{color:var(--blue);}
+.modal-stack{display:flex;flex-wrap:wrap;gap:8px;}
+.modal-footer{padding:24px 48px;border-top:1px solid var(--border);display:flex;gap:14px;}
+.modal-btn{font-family:'Fira Code',monospace;font-size:11px;letter-spacing:2px;padding:12px 24px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:background .3s,box-shadow .3s,transform .3s;cursor:pointer;}
+.modal-btn.primary{background:var(--green);color:var(--bg);font-weight:700;clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);}
+.modal-btn.primary:hover{box-shadow:0 12px 32px rgba(0,255,157,.25);transform:translateY(-2px);}
+.modal.health .modal-btn.primary{background:var(--blue);}
+.modal-btn.ghost{border:1px solid var(--border2);color:var(--muted2);}
+.modal-btn.ghost:hover{border-color:var(--white);color:var(--white);}
+
+section{position:relative;z-index:2;}
+
+#hero{min-height:100vh;display:flex;align-items:center;padding:120px 64px 80px;}
+.hero-inner{max-width:1100px;width:100%;}
+.hero-prompt{font-family:'Fira Code',monospace;font-size:13px;color:var(--muted2);margin-bottom:20px;opacity:0;animation:up .6s .2s forwards;display:flex;align-items:center;gap:8px;}
+.hero-prompt span{color:var(--green);}
+.hero-title{font-size:clamp(52px,7.5vw,110px);font-weight:800;line-height:.95;letter-spacing:-2px;opacity:0;animation:up .8s .4s forwards;}
+.hero-title .name-first{color:var(--white);}
+.hero-title .name-last{color:transparent;-webkit-text-stroke:1.5px var(--green);text-shadow:0 0 60px rgba(0,255,157,0.2);}
+.hero-title .role{display:block;font-size:clamp(18px,2.8vw,38px);font-weight:300;letter-spacing:2px;color:var(--muted2);margin-top:12px;font-family:'Space Mono',monospace;}
+.hero-title .role em{color:var(--blue);font-style:normal;}
+.hero-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px;opacity:0;animation:up .8s .6s forwards;}
+.tag{font-family:'Fira Code',monospace;font-size:11px;letter-spacing:1px;padding:7px 16px;border:1px solid var(--border2);color:var(--blue);background:rgba(0,200,255,0.04);transition:background .3s,border-color .3s;}
+.tag:hover{background:rgba(0,200,255,0.1);border-color:var(--blue);}
+.hero-desc{max-width:560px;font-size:14px;line-height:1.9;color:var(--muted2);margin-top:36px;font-family:'Space Mono',monospace;opacity:0;animation:up .8s .8s forwards;}
+.hero-cta{display:flex;gap:20px;align-items:center;margin-top:48px;opacity:0;animation:up .8s 1s forwards;}
+.btn-main{display:inline-flex;align-items:center;gap:12px;padding:14px 32px;background:var(--green);color:var(--bg);font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:transform .3s,box-shadow .3s;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,255,157,.3);}
+.btn-line{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);text-decoration:none;transition:color .3s;display:flex;align-items:center;gap:8px;}
+.btn-line:hover{color:var(--white);}
+.hero-metrics{position:absolute;right:64px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:30px;opacity:0;animation:fadeIn 1s 1.2s forwards;}
+.metric{text-align:right;border-right:1px solid rgba(0,255,157,0.2);padding-right:20px;}
+.metric-num{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;color:var(--green);line-height:1;}
+.metric-num span{font-size:24px;}
+.metric-label{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:4px;}
+.scroll-line{position:absolute;bottom:40px;left:64px;font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);letter-spacing:3px;display:flex;align-items:center;gap:16px;animation:fadeIn 1s 1.5s both;}
+.scroll-line::after{content:'';width:50px;height:1px;background:linear-gradient(to right,var(--muted),transparent);}
+
+.terminal{font-family:'Fira Code',monospace;background:rgba(0,0,0,0.6);border:1px solid rgba(0,255,157,0.15);padding:28px 32px;font-size:12px;line-height:1.9;position:relative;overflow:hidden;}
+.terminal::before{content:'● ● ●';position:absolute;top:10px;left:14px;font-size:10px;color:var(--muted);letter-spacing:4px;}
+.terminal-line{padding-top:4px;}
+.t-g{color:var(--green);} .t-b{color:var(--blue);} .t-p{color:var(--purple);} .t-o{color:var(--orange);} .t-m{color:var(--muted2);}
+
+#about{padding:140px 64px;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;}
+.about-card{background:var(--card);border:1px solid var(--border);padding:48px;position:relative;overflow:hidden;clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));}
+.about-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,255,157,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(0,200,255,0.04) 0%,transparent 50%);}
+.about-avatar-ring{width:120px;height:120px;border-radius:50%;border:2px solid var(--green);position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 0 30px rgba(0,255,157,0.15);}
+.about-avatar-ring::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(0,255,157,0.2);animation:spin 12s linear infinite;}
+.about-name{font-size:22px;font-weight:700;margin-bottom:4px;}
+.about-role{font-family:'Fira Code',monospace;font-size:12px;color:var(--blue);letter-spacing:1px;}
+.about-location{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted2);margin-top:8px;display:flex;align-items:center;gap:6px;}
+.about-location::before{content:'📍';font-size:10px;}
+.skill-bars{margin-top:32px;display:flex;flex-direction:column;gap:14px;}
+.skill-bar-header{display:flex;justify-content:space-between;margin-bottom:6px;}
+.skill-bar-name{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted2);}
+.skill-bar-pct{font-family:'Fira Code',monospace;font-size:11px;}
+.skill-bar-track{height:3px;background:rgba(255,255,255,0.05);overflow:hidden;}
+.skill-bar-fill{height:100%;width:0;transition:width 1.4s ease;}
+.fill-g{background:linear-gradient(to right,var(--green),var(--blue));}
+.fill-b{background:linear-gradient(to right,var(--blue),var(--purple));}
+.fill-p{background:linear-gradient(to right,var(--purple),var(--orange));}
+.fill-o{background:linear-gradient(to right,var(--orange),var(--green));}
+
+.section-label{font-family:'Fira Code',monospace;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.section-label::before{content:'//';color:var(--muted2);}
+.section-title{font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.0;margin-bottom:28px;}
+.section-title em{font-style:normal;color:var(--blue);}
+.body-text{font-family:'Space Mono',monospace;font-size:12px;line-height:2;color:var(--muted2);margin-bottom:16px;text-align:justify;}
+
+#experience{padding:140px 64px;}
+.exp-grid{margin-top:64px;display:flex;flex-direction:column;gap:2px;}
+.exp-item{background:var(--card);border:1px solid var(--border);padding:40px 48px;display:grid;grid-template-columns:160px 1fr;gap:48px;align-items:start;transition:border-color .4s;position:relative;overflow:hidden;}
+.exp-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(0,255,157,0.04),transparent);transition:width .5s;}
+.exp-item:hover{border-color:rgba(0,255,157,0.25);}
+.exp-item:hover::before{width:100%;}
+.exp-date{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted2);letter-spacing:1px;padding-top:6px;line-height:1.7;}
+.exp-current{display:inline-block;margin-top:10px;padding:3px 10px;background:rgba(0,255,157,0.1);border:1px solid rgba(0,255,157,0.3);color:var(--green);font-size:9px;letter-spacing:2px;}
+.exp-role{font-size:20px;font-weight:700;margin-bottom:4px;}
+.exp-org{font-family:'Fira Code',monospace;font-size:12px;color:var(--blue);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.exp-org::before{content:'@';color:var(--muted2);}
+.exp-bullets{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.exp-bullets li{font-family:'Space Mono',monospace;font-size:11px;line-height:1.8;color:var(--muted2);padding-left:20px;position:relative;}
+.exp-bullets li::before{content:'▹';position:absolute;left:0;color:var(--green);}
+
+#projects{padding:140px 64px;}
+.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.project-card{background:var(--card);border:1px solid var(--border);padding:44px;position:relative;overflow:hidden;transition:border-color .4s,transform .4s;cursor:pointer;}
+.project-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--blue));transform:scaleX(0);transform-origin:left;transition:transform .4s;}
+.project-card.health::after{background:linear-gradient(90deg,var(--blue),var(--purple));}
+.project-card:hover{border-color:rgba(0,255,157,0.25);transform:translateY(-4px);}
+.project-card.health:hover{border-color:rgba(0,200,255,0.25);}
+.project-card:hover::after{transform:scaleX(1);}
+.project-num{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+.proj-domain{font-size:9px;letter-spacing:2px;padding:3px 10px;border:1px solid;font-family:'Fira Code',monospace;}
+.proj-domain.fin{border-color:rgba(0,255,157,0.3);color:var(--green);background:rgba(0,255,157,0.05);}
+.proj-domain.hlth{border-color:rgba(0,200,255,0.3);color:var(--blue);background:rgba(0,200,255,0.05);}
+.project-icon{font-size:32px;margin-bottom:20px;display:block;}
+.project-name{font-size:20px;font-weight:700;margin-bottom:12px;line-height:1.2;}
+.project-desc{font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;color:var(--muted2);margin-bottom:24px;}
+.project-stack{display:flex;flex-wrap:wrap;gap:8px;}
+.stack-tag{font-family:'Fira Code',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;border:1px solid rgba(168,85,247,0.3);color:var(--purple);background:rgba(168,85,247,0.05);}
+.project-arrow{position:absolute;top:28px;right:28px;font-size:18px;color:var(--muted);transition:color .3s,transform .3s;}
+.project-card:hover .project-arrow{color:var(--green);transform:translate(4px,-4px);}
+.project-card.health:hover .project-arrow{color:var(--blue);}
+
+#skills{padding:100px 64px;}
+.skills-matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:64px;}
+.skill-group{background:var(--card);border:1px solid var(--border);padding:36px 32px;}
+.skill-group-title{font-family:'Fira Code',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.skill-list{display:flex;flex-direction:column;gap:12px;}
+.skill-chip{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:8px;transition:color .3s;}
+.skill-chip::before{content:'◆';font-size:6px;color:var(--blue);}
+.skill-chip:hover{color:var(--white);}
+
+#education{padding:100px 64px;}
+.edu-row{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:64px;}
+.edu-card{background:var(--card);border:1px solid var(--border);padding:44px;position:relative;overflow:hidden;transition:border-color .4s;}
+.edu-card:hover{border-color:rgba(0,200,255,0.3);}
+.edu-badge{width:52px;height:52px;border-radius:50%;margin-bottom:24px;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--border2);}
+.edu-degree{font-size:18px;font-weight:700;margin-bottom:8px;}
+.edu-school{font-family:'Fira Code',monospace;font-size:12px;color:var(--blue);margin-bottom:8px;}
+.edu-detail{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted2);line-height:1.8;}
+
+#publications{padding:100px 64px;}
+.pub-card{background:var(--card);border:1px solid var(--border);padding:40px 48px;position:relative;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));}
+.pub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--blue));}
+.pub-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:16px;flex-wrap:wrap;}
+.pub-venue{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:2px;color:var(--blue);text-transform:uppercase;}
+.pub-date{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted2);}
+.pub-title{font-size:22px;font-weight:700;margin-bottom:16px;line-height:1.3;}
+.pub-desc{font-family:'Space Mono',monospace;font-size:12px;line-height:2;color:var(--muted2);margin-bottom:24px;}
+.pub-stack{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.pub-tag{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:1px;padding:4px 12px;border:1px solid rgba(0,255,157,0.2);color:var(--green);background:rgba(0,255,157,0.04);}
+.pub-link{font-family:'Fira Code',monospace;font-size:12px;letter-spacing:2px;color:var(--green);text-decoration:none;border-bottom:1px solid rgba(0,255,157,0.3);padding-bottom:2px;transition:border-color .3s,color .3s;}
+.pub-link:hover{color:var(--white);border-color:var(--white);}
+
+#certifications{padding:100px 64px;}
+.cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
+.cert-card{background:var(--card);border:1px solid var(--border);padding:32px;display:flex;flex-direction:column;gap:20px;position:relative;transition:border-color .3s,transform .3s;}
+.cert-card:hover{border-color:rgba(0,200,255,0.25);transform:translateY(-4px);}
+.cert-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple));transform:scaleX(0);transition:transform .4s;transform-origin:left;}
+.cert-card:hover::after{transform:scaleX(1);}
+.cert-icon{font-size:32px;}
+.cert-body{flex:1;}
+.cert-title{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:8px;}
+.cert-issuer{font-family:'Fira Code',monospace;font-size:11px;color:var(--blue);letter-spacing:1px;margin-bottom:10px;}
+.cert-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted2);line-height:1.7;}
+.cert-id{color:var(--muted);font-size:9px;display:block;margin-top:4px;}
+.cert-badge{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:2px;color:var(--green);text-decoration:none;border:1px solid rgba(0,255,157,0.2);padding:8px 14px;text-align:center;transition:background .3s,border-color .3s;}
+.cert-badge:hover{background:rgba(0,255,157,0.08);border-color:var(--green);}
+
+#contact{padding:160px 64px;text-align:center;position:relative;overflow:hidden;}
+#contact::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,157,0.04) 0%,transparent 70%);pointer-events:none;}
+.contact-pre{font-family:'Fira Code',monospace;font-size:12px;color:var(--green);margin-bottom:16px;letter-spacing:2px;}
+.contact-title{font-size:clamp(48px,7vw,100px);font-weight:800;line-height:.95;margin-bottom:24px;}
+.contact-title em{font-style:normal;color:var(--green);}
+.contact-sub{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted2);margin-bottom:52px;line-height:1.8;}
+.contact-links{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;}
+.contact-link{display:flex;align-items:center;gap:10px;padding:14px 28px;border:1px solid var(--border2);font-family:'Fira Code',monospace;font-size:12px;color:var(--blue);text-decoration:none;transition:background .3s,border-color .3s,color .3s;background:rgba(0,200,255,0.03);}
+.contact-link:hover{background:rgba(0,200,255,0.1);border-color:var(--blue);color:var(--white);}
+.contact-link.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:700;}
+.contact-link.primary:hover{box-shadow:0 12px 32px rgba(0,255,157,.3);transform:translateY(-2px);}
+
+footer{padding:28px 64px;border-top:1px solid var(--border);position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;}
+.footer-copy{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);}
+.footer-copy span{color:var(--green);}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}
+.reveal.visible{opacity:1;transform:none;}
+.r1{transition-delay:.1s;} .r2{transition-delay:.2s;} .r3{transition-delay:.3s;} .r4{transition-delay:.4s;}
+
+@keyframes up{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+.marquee-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 0;background:var(--surface);}
+.marquee-track{display:flex;animation:marquee 28s linear infinite;white-space:nowrap;}
+.marquee-item{font-family:'Fira Code',monospace;font-size:12px;color:var(--muted);padding:0 32px;display:flex;align-items:center;gap:32px;}
+.marquee-item span{color:var(--green);font-size:8px;}
+
+@media(max-width:1000px){
+  nav{padding:18px 24px;}
+  .nav-links{gap:14px;}
+  .nav-links a{font-size:10px;}
+  #hero,#about,#experience,#projects,#skills,#education,#publications,#certifications,#contact{padding-left:24px;padding-right:24px;}
+  .hero-metrics{display:none;}
+  #about{grid-template-columns:1fr;gap:50px;}
+  .projects-grid,.skills-matrix,.edu-row,.cert-grid{grid-template-columns:1fr;}
+  .exp-item{grid-template-columns:1fr;gap:12px;}
+  footer{padding:24px;flex-direction:column;gap:12px;text-align:center;}
+  .scroll-line{display:none;}
+  .modal-body,.modal-header,.modal-footer{padding-left:24px;padding-right:24px;}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"><div id="cur-dot"></div><div id="cur-ring"></div></div>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <a href="#" class="nav-logo">manjunath.popuri</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#publications">Publications</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="status-dot"></div>Available for roles</div>
+</nav>
+
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-prompt"><span>$</span> whoami</div>
+    <h1 class="hero-title">
+      <span class="name-first">Manjunath </span><span class="name-last">Popuri</span>
+      <span class="role">AI/ML Engineer &amp; <em>Data Scientist</em></span>
+    </h1>
+    <div class="hero-tags">
+      <span class="tag">LLMs &amp; GenAI</span><span class="tag">NLP</span><span class="tag">Python</span>
+      <span class="tag">AWS &amp; Azure</span><span class="tag">TensorFlow</span>
+      <span class="tag">Power BI</span><span class="tag">SQL</span><span class="tag">BERT</span>
+    </div>
+    <p class="hero-desc">MS CS (AI Specialization) @ Binghamton University. Building AI-powered systems that bridge research and real-world impact - from NLP pipelines to LLM deployments.</p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-main">View Projects →</a>
+      <a href="#contact" class="btn-line">Get in Touch →</a>
+    </div>
+  </div>
+  <div class="hero-metrics">
+    <div class="metric"><div class="metric-num">3<span>+</span></div><div class="metric-label">Years in AI/ML</div></div>
+    <div class="metric"><div class="metric-num">10<span>+</span></div><div class="metric-label">AI Projects</div></div>
+    <div class="metric"><div class="metric-num">5<span>+</span></div><div class="metric-label">Technologies</div></div>
+  </div>
+  <div class="scroll-line">scroll to explore</div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">LLMs <span>◆</span></div><div class="marquee-item">NLP Pipelines <span>◆</span></div>
+    <div class="marquee-item">BERT / Transformers <span>◆</span></div><div class="marquee-item">AWS &amp; Azure <span>◆</span></div>
+    <div class="marquee-item">TensorFlow <span>◆</span></div><div class="marquee-item">Python <span>◆</span></div>
+    <div class="marquee-item">Power BI <span>◆</span></div><div class="marquee-item">GenAI <span>◆</span></div>
+    <div class="marquee-item">Mistral-7B <span>◆</span></div><div class="marquee-item">CI/CD Pipelines <span>◆</span></div>
+    <div class="marquee-item">LLMs <span>◆</span></div><div class="marquee-item">NLP Pipelines <span>◆</span></div>
+    <div class="marquee-item">BERT / Transformers <span>◆</span></div><div class="marquee-item">AWS &amp; Azure <span>◆</span></div>
+    <div class="marquee-item">TensorFlow <span>◆</span></div><div class="marquee-item">Python <span>◆</span></div>
+    <div class="marquee-item">Power BI <span>◆</span></div><div class="marquee-item">GenAI <span>◆</span></div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="about-visual reveal">
+    <div class="about-card">
+      <div class="about-avatar-ring">
+        <img src="my_image.jpeg" alt="Manjunath Popuri"
+          style="width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center top;" />
+      </div>
+      <div class="about-name">Manjunath Popuri</div>
+      <div class="about-role">Data Scientist · AI/ML Engineer</div>
+      <div class="about-location">New Hyde Park, New York</div>
+      <div class="skill-bars" style="margin-top:36px;">
+        <div class="skill-bar-item">
+          <div class="skill-bar-header"><span class="skill-bar-name">Machine Learning / DL</span><span class="skill-bar-pct t-g">95%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill fill-g" data-width="95"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-header"><span class="skill-bar-name">NLP &amp; Transformers</span><span class="skill-bar-pct t-b">92%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill fill-b" data-width="92"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-header"><span class="skill-bar-name">Cloud (AWS / Azure)</span><span class="skill-bar-pct t-p">91%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill fill-p" data-width="91"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-header"><span class="skill-bar-name">Data Analytics &amp; BI</span><span class="skill-bar-pct t-o">97%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill fill-o" data-width="97"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-header"><span class="skill-bar-name">Python &amp; SQL</span><span class="skill-bar-pct t-g">99%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill fill-g" data-width="99"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="terminal reveal r3" style="margin-top:32px;">
+      <div style="padding-top:24px;">
+        <div class="terminal-line"><span class="t-g">const</span> <span class="t-b">manjunath</span> = {</div>
+        <div class="terminal-line" style="padding-left:20px;"><span class="t-p">university</span>: <span class="t-o">"Binghamton University"</span>,</div>
+        <div class="terminal-line" style="padding-left:20px;"><span class="t-p">degree</span>: <span class="t-o">"MS Computer Science (AI)"</span>,</div>
+        <div class="terminal-line" style="padding-left:20px;"><span class="t-p">focus</span>: <span class="t-o">"LLMs, GenAI, NLP, ML"</span>,</div>
+        <div class="terminal-line" style="padding-left:20px;"><span class="t-p">prevExp</span>: <span class="t-o">"Cognizant - Machine Learning Engineer"</span>,</div>
+        <div class="terminal-line" style="padding-left:20px;"><span class="t-p">openTo</span>: <span class="t-o">"Full-time Data Scientist &amp; AI/ML Roles"</span></div>
+        <div class="terminal-line">};</div>
+      </div>
+    </div>
+  </div>
+  <div class="about-right">
+    <div class="section-label reveal">About me</div>
+    <h2 class="section-title reveal r1">Building the <em>Future</em><br>with AI</h2>
+    <p class="body-text reveal r2">I'm an AI/ML Engineer and Data Scientist with hands-on experience across the full model lifecycle - from feature engineering and deep learning to LLM fine-tuning, RAG pipelines, and cloud deployment on AWS, Azure, and GCP. Currently advancing my MS in Computer Science (AI Specialization) at Binghamton University while building production-grade AI systems in both financial intelligence and clinical healthcare.</p>
+    <p class="body-text reveal r2">Previously at Cognizant, I engineered credit risk models for 10M+ customers and automated ML pipelines that cut processing time by 20%. Today I build things like HIPAA-compliant GenAI summarization engines, fraud detection platforms with Responsible AI layers, and reinforcement learning trading agents - work that sits at the intersection of rigorous data science and real-world deployment at scale.</p>
+    <p class="body-text reveal r2">I'm particularly passionate about translating complex AI research into scalable, business-ready solutions that deliver measurable impact. I thrive in fast-paced environments where innovation, experimentation, and continuous learning drive meaningful outcomes.</p>
+    <p class="body-text reveal r2">Beyond technical work, I enjoy collaborating across teams, mentoring peers, and staying at the forefront of emerging trends in generative AI, responsible AI, and intelligent automation.</p>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="section-label reveal">Career</div>
+  <h2 class="section-title reveal r1">Work <em>Experience</em></h2>
+  <div class="exp-grid">
+
+    <!-- ── ROLE 1: Dynamic duration ── -->
+    <div class="exp-item reveal">
+      <div class="exp-date">
+        Jul 2025 - Present<br>
+        <span class="exp-current">Current · <span id="exp-duration"></span></span>
+      </div>
+      <div class="exp-body">
+        <div class="exp-role">AI/ML Engineer</div>
+        <div class="exp-org">Binghamton University</div>
+        <ul class="exp-bullets">
+          <li>Developed a RAG-based QA system using Phi-3 Mini and FLAN-T5; achieved 88% accuracy by optimizing retrieval chains for medical and financial datasets.</li>
+          <li>Fine-tuned LLMs with QLoRA and PEFT, reducing GPU memory overhead by 20% while maintaining peak predictive performance and model stability.</li>
+          <li>Built an interactive Streamlit suite and Power BI dashboards via FastAPI to transform complex model outputs into real-time insights and stakeholder reporting.</li>
+          <li>Applied SHAP and MLflow for model explainability and tracking; implemented automated validation pipelines ensuring reproducibility and 99.9% reliability.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exp-item reveal r1">
+      <div class="exp-date">Aug 2024 - May 2025<br><span style="font-family:'Fira Code',monospace;font-size:9px;color:var(--blue);letter-spacing:1px;">10 mo</span></div>
+      <div class="exp-body">
+        <div class="exp-role">Graduate Research Assistant</div>
+        <div class="exp-org">Binghamton University</div>
+        <ul class="exp-bullets">
+          <li>Developed instruction-tuned transformer pipelines for semantic analysis of MIMIC-III EHR data, reducing manual labeling and text-extraction time by 25%.</li>
+          <li>Managed HIPAA-compliant ETL pipelines for 10M+ records of structured and unstructured claims data using PySpark and SQL.</li>
+          <li>Trained XGBoost and Quantized Phi-3 models to classify complex health insurance claims, optimizing for clinical relevance and HIPAA regulatory standards.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exp-item reveal r2">
+      <div class="exp-date">Jul 2021 - Jun 2023<br><span style="font-family:'Fira Code',monospace;font-size:9px;color:var(--blue);letter-spacing:1px;">2 yrs</span></div>
+      <div class="exp-body">
+        <div class="exp-role">Machine Learning Engineer</div>
+        <div class="exp-org">Cognizant</div>
+        <ul class="exp-bullets">
+          <li>Deployed XGBoost and LSTM models to predict credit default risk for 10M+ customers, improving precision (AUC-ROC) by 8% while maintaining Basel III compliance.</li>
+          <li>Architected automated feature engineering pipelines using PySpark and SQL, reducing data processing runtime by 20% and enabling near real-time risk scoring.</li>
+          <li>Enhanced deployed risk models with automated monitoring and Power BI dashboards, reducing manual audits and improving portfolio risk management efficiency by 10%.</li>
+          <li>Conducted A/B testing on credit policies, identifying drivers of customer churn and informing a new risk strategy that supported a 5% increase in acquisition.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="exp-item reveal r3">
+      <div class="exp-date">Mar - May 2022<br><span style="font-family:'Fira Code',monospace;font-size:9px;color:var(--blue);letter-spacing:1px;">Internship · 3 mo</span></div>
+      <div class="exp-body">
+        <div class="exp-role">AWS Virtual Intern</div>
+        <div class="exp-org">All India Council for Technical Education (AICTE)</div>
+        <ul class="exp-bullets">
+          <li>Built cloud-based solutions using AWS services including EC2, S3, Lambda, and RDS for scalable application deployment.</li>
+          <li>Designed and implemented relational databases with Amazon RDS to power dynamic, data-driven applications.</li>
+          <li>Deployed serverless architectures leveraging AWS Lambda and S3 for efficient event-driven processing pipelines.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="projects">
+  <div class="section-label reveal">Portfolio</div>
+  <h2 class="section-title reveal r1">Featured <em>Projects</em></h2>
+  <p class="body-text reveal r2" style="max-width:640px;margin-bottom:0;">Spanning two high-stakes domains - financial intelligence and clinical AI - each project reflects an end-to-end ML mindset: from raw data and model design to deployed, measurable real-world impact.</p>
+  <div class="projects-grid" style="margin-top:48px;">
+
+    <div class="project-card reveal">
+      <div class="project-num">[ 01 ] <span class="proj-domain fin">Finance</span></div>
+      <span class="project-icon">🛡️</span>
+      <div class="project-name">Financial Risk &amp; Fraud Detection System</div>
+      <div class="project-desc">End-to-end fraud intelligence platform trained on 10M+ transactions - combining supervised classification, anomaly detection, and a RAG-enabled GenAI layer for real-time financial analysis. Achieved 92% accuracy, +12% fraud recall, and a 15% reduction in loan-approval bias through Responsible AI techniques.</div>
+      <div class="project-stack"><span class="stack-tag">PyTorch</span><span class="stack-tag">XGBoost</span><span class="stack-tag">Azure ML</span><span class="stack-tag">RAG</span><span class="stack-tag">LLMs</span><span class="stack-tag">Docker</span><span class="stack-tag">SQL</span><span class="stack-tag">Tableau</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+    <div class="project-card health reveal r1">
+      <div class="project-num">[ 02 ] <span class="proj-domain hlth">Healthcare</span></div>
+      <span class="project-icon">🏥</span>
+      <div class="project-name">Clinical Chart Review Assistant (RAG + LLM)</div>
+      <div class="project-desc">Production RAG pipeline using FLAN-T5, Phi-3, and ClinicalBERT (PEFT/LoRA) to auto-generate SOAP note summaries and flag medication safety issues. Reduced hallucination rate by 40% through retrieval grounding - delivering a reliable, audit-ready clinical intelligence layer at scale.</div>
+      <div class="project-stack"><span class="stack-tag">FLAN-T5</span><span class="stack-tag">ClinicalBERT</span><span class="stack-tag">LangChain</span><span class="stack-tag">ChromaDB</span><span class="stack-tag">SageMaker</span><span class="stack-tag">FastAPI</span><span class="stack-tag">Streamlit</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+    <div class="project-card reveal r1">
+      <div class="project-num">[ 03 ] <span class="proj-domain fin">Finance</span></div>
+      <span class="project-icon">📉</span>
+      <div class="project-name">Customer Churn Prediction &amp; Personalization Engine</div>
+      <div class="project-desc">Churn-prediction system built on 500K+ customer records using advanced feature engineering and ensemble methods. Delivered personalization-driven behavioral insights that reduced modeled churn risk by 12%, paired with interactive Power BI dashboards for real-time stakeholder decision-making.</div>
+      <div class="project-stack"><span class="stack-tag">Scikit-learn</span><span class="stack-tag">XGBoost</span><span class="stack-tag">Pandas</span><span class="stack-tag">SQL</span><span class="stack-tag">Power BI</span><span class="stack-tag">Tableau</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+    <div class="project-card health reveal r2">
+      <div class="project-num">[ 04 ] <span class="proj-domain hlth">Healthcare</span></div>
+      <span class="project-icon">📋</span>
+      <div class="project-name">GenAI Clinical Summarization &amp; Compliance Engine</div>
+      <div class="project-desc">PPO-based RL pipeline with toxicity-aware rewards enforcing HIPAA compliance in LLM-generated clinical summaries - achieving zero policy violations across 10K test documents. Directly applicable to RADV audit documentation and regulated healthcare reporting workflows.</div>
+      <div class="project-stack"><span class="stack-tag">PyTorch</span><span class="stack-tag">HuggingFace</span><span class="stack-tag">LangChain</span><span class="stack-tag">SageMaker</span><span class="stack-tag">ChromaDB</span><span class="stack-tag">RL / PPO</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+    <div class="project-card reveal r2">
+      <div class="project-num">[ 05 ] <span class="proj-domain fin">Finance</span></div>
+      <span class="project-icon">🤖</span>
+      <div class="project-name">Autonomous Trading Agent - Reinforcement Learning</div>
+      <div class="project-desc">DQN-based RL agent achieving +15% return over baselines in rigorous backtesting. Deployed as a FastAPI REST API on AWS with Docker containerization - demonstrating reinforcement learning applied to sequential decision-making and real-time agentic AI architectures.</div>
+      <div class="project-stack"><span class="stack-tag">PyTorch</span><span class="stack-tag">TensorFlow</span><span class="stack-tag">OpenAI Gym</span><span class="stack-tag">FastAPI</span><span class="stack-tag">Docker</span><span class="stack-tag">AWS</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+    <div class="project-card health reveal r3">
+      <div class="project-num">[ 06 ] <span class="proj-domain hlth">Healthcare</span></div>
+      <span class="project-icon">📈</span>
+      <div class="project-name">Patient Outcome Prediction &amp; Cohort Segmentation</div>
+      <div class="project-desc">LSTM/GRU discharge readiness models combined with K-Means cohort stratification across 6 patient segments - improving hospital resource planning accuracy by 18%. Full MLflow experiment tracking and Tableau reporting deliver end-to-end observability from model training to clinical insight.</div>
+      <div class="project-stack"><span class="stack-tag">PyTorch</span><span class="stack-tag">TensorFlow</span><span class="stack-tag">LSTM / GRU</span><span class="stack-tag">SageMaker</span><span class="stack-tag">MLflow</span><span class="stack-tag">Tableau</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+    <div class="project-card health reveal r3" style="grid-column:1/-1;">
+      <div class="project-num">[ 07 ] <span class="proj-domain hlth">Healthcare</span></div>
+      <span class="project-icon">🔬</span>
+      <div class="project-name">Medical Imaging Classification - Computer Vision</div>
+      <div class="project-desc">ResNet/MobileNetV3 models classifying X-ray and MRI abnormalities at 92% accuracy, deployed via MLflow and Docker for real-time clinical inference. PySpark preprocessing at scale ensures the pipeline handles production-grade imaging volumes without bottlenecks - bridging research-quality CV with clinical deployment demands.</div>
+      <div class="project-stack"><span class="stack-tag">PyTorch</span><span class="stack-tag">TensorFlow</span><span class="stack-tag">OpenCV</span><span class="stack-tag">ResNet</span><span class="stack-tag">MobileNetV3</span><span class="stack-tag">PySpark</span><span class="stack-tag">MLflow</span><span class="stack-tag">Docker</span></div>
+      <div class="project-arrow">↗</div>
+    </div>
+
+  </div>
+</section>
+
+<section id="skills">
+  <div class="section-label reveal">Tech Stack</div>
+  <h2 class="section-title reveal r1">Skills &amp; <em>Tools</em></h2>
+  <div class="skills-matrix">
+    <div class="skill-group reveal">
+      <div class="skill-group-title">Programming &amp; Querying</div>
+      <div class="skill-list">
+        <div class="skill-chip">Python</div><div class="skill-chip">R</div>
+        <div class="skill-chip">SQL</div><div class="skill-chip">Java</div><div class="skill-chip">C / C++</div>
+      </div>
+    </div>
+    <div class="skill-group reveal r1">
+      <div class="skill-group-title">Data Science &amp; Analytics</div>
+      <div class="skill-list">
+        <div class="skill-chip">Predictive Analytics</div><div class="skill-chip">Statistical Modeling</div>
+        <div class="skill-chip">Hypothesis Testing</div><div class="skill-chip">A/B Testing</div>
+        <div class="skill-chip">Regression &amp; Classification</div>
+      </div>
+    </div>
+    <div class="skill-group reveal r2">
+      <div class="skill-group-title">Machine Learning &amp; AI</div>
+      <div class="skill-list">
+        <div class="skill-chip">TensorFlow / PyTorch</div><div class="skill-chip">Hugging Face / Transformers</div>
+        <div class="skill-chip">Generative AI &amp; LLM Fine-tuning</div><div class="skill-chip">NLP (FLAN-T5, Phi-3)</div>
+        <div class="skill-chip">Deep Learning (CNN, RNN, LSTM, GRU)</div><div class="skill-chip">OpenCV</div>
+      </div>
+    </div>
+    <div class="skill-group reveal r1">
+      <div class="skill-group-title">Data Tools &amp; Visualization</div>
+      <div class="skill-list">
+        <div class="skill-chip">Pandas / NumPy</div><div class="skill-chip">Matplotlib / Seaborn / Plotly</div>
+        <div class="skill-chip">Power BI / Tableau</div><div class="skill-chip">Streamlit</div>
+      </div>
+    </div>
+    <div class="skill-group reveal r2">
+      <div class="skill-group-title">Cloud &amp; MLOps</div>
+      <div class="skill-list">
+        <div class="skill-chip">AWS (SageMaker, EC2, S3, Lambda)</div><div class="skill-chip">Azure ML</div>
+        <div class="skill-chip">GCP (BigQuery, Dataflow)</div><div class="skill-chip">Docker / Kubernetes</div>
+        <div class="skill-chip">CI/CD / MLflow</div>
+      </div>
+    </div>
+    <div class="skill-group reveal r3">
+      <div class="skill-group-title">ETL, Databases &amp; Big Data</div>
+      <div class="skill-list">
+        <div class="skill-chip">PySpark / Apache Spark</div><div class="skill-chip">Snowflake / dbt / Airflow</div>
+        <div class="skill-chip">MySQL / PostgreSQL / MongoDB</div><div class="skill-chip">MS SQL Server / ChromaDB</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="section-label reveal">Academic</div>
+  <h2 class="section-title reveal r1">Education</h2>
+  <div class="edu-row">
+    <div class="edu-card reveal">
+      <div class="edu-badge">🎓</div>
+      <div class="edu-degree">Master of Science - Computer Science</div>
+      <div class="edu-school">Binghamton University, SUNY  · 2023 - 2025</div>
+      <div class="edu-detail">Specialization: Artificial Intelligence<br>Thomas J. Watson College of Engineering and Applied Science<br>Binghamton, New York</div>
+    </div>
+    <div class="edu-card reveal r1">
+      <div class="edu-badge">🏛️</div>
+      <div class="edu-degree">Bachelor of Technology - Computer Science &amp; Engineering</div>
+      <div class="edu-school">Vasireddy Venkatadri Institute of Technology, India  · 2019 - 2023</div>
+      <div class="edu-detail">Strong foundation in data structures, algorithms, and software engineering</div>
+    </div>
+  </div>
+</section>
+
+<section id="publications">
+  <div class="section-label reveal">Research</div>
+  <h2 class="section-title reveal r1">Publications</h2>
+  <div style="margin-top:56px;">
+    <div class="pub-card reveal">
+      <div class="pub-meta">
+        <span class="pub-venue">IJFANS - International Journal of Food and Nutritional Sciences</span>
+        <span class="pub-date">December 2022</span>
+      </div>
+      <div class="pub-title">Opinion Mining on Twitter Data Using Machine Learning</div>
+      <div class="pub-desc">Sentiment analysis of tweets related to NASA's Artemis I mission. Applied NLP techniques - BERT, Word2Vec, VADER - alongside classification models (SVM, Decision Tree, Random Forest) to achieve 97.4% accuracy. Developed a Flask-based dashboard for real-time sentiment visualization.</div>
+      <div class="pub-stack">
+        <span class="pub-tag">BERT</span><span class="pub-tag">Word2Vec</span><span class="pub-tag">VADER</span>
+        <span class="pub-tag">SVM</span><span class="pub-tag">Random Forest</span><span class="pub-tag">Flask</span>
+        <span class="pub-tag">NLP</span><span class="pub-tag">Sentiment Analysis</span>
+      </div>
+      <a href="https://ijfans.org/issue-content/opinion-mining-on-twitter-data-using-machine-learning-2950" target="_blank" class="pub-link">Read Paper ↗</a>
+    </div>
+  </div>
+</section>
+
+<section id="certifications">
+  <div class="section-label reveal">Credentials</div>
+  <h2 class="section-title reveal r1">Certifications</h2>
+  <div class="cert-grid">
+    <div class="cert-card reveal">
+      <div class="cert-icon">🤖</div>
+      <div class="cert-body">
+        <div class="cert-title">Generative AI with Large Language Models</div>
+        <div class="cert-issuer">Amazon Web Services (AWS)</div>
+        <div class="cert-meta">Issued May 2025<span class="cert-id">Credential ID: U34TIU0OIOUL</span></div>
+      </div>
+      <a href="https://www.coursera.org/account/accomplishments/verify/U34TIU0OIOUL" target="_blank" class="cert-badge">See Credential ↗</a>
+    </div>
+    <div class="cert-card reveal r1">
+      <div class="cert-icon">☁️</div>
+      <div class="cert-body">
+        <div class="cert-title">AWS Certifications</div>
+        <div class="cert-issuer">All India Council for Technical Education (AICTE)</div>
+        <div class="cert-meta">Issued May 2022<span class="cert-id">Credential ID: 662eafd1c8ba132fceaa7d40946aa011</span></div>
+      </div>
+      <a href="https://drive.google.com/file/d/17ACfWdAmOyiiywTxHnJeyjax4UooLobJ" target="_blank" class="cert-badge">See Credential ↗</a>
+    </div>
+    <div class="cert-card reveal r2">
+      <div class="cert-icon">🧠</div>
+      <div class="cert-body">
+        <div class="cert-title">Machine Learning with Python</div>
+        <div class="cert-issuer">Coursera</div>
+        <div class="cert-meta">Issued Oct 2021</div>
+      </div>
+      <a href="https://www.credly.com/badges/dc680c61-cd89-44fa-9bed-066e7ec9e801" target="_blank" class="cert-badge">See Credential ↗</a>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-pre">// let's build something great</div>
+  <h2 class="contact-title reveal">Let's <em>Connect</em></h2>
+  <p class="contact-sub reveal r1">I'm actively looking for full-time AI/ML and Data Science roles.<br>Let's talk about how I can bring value to your team.</p>
+  <div class="contact-links reveal r2">
+    <a href="https://www.linkedin.com/in/manjunathpopuri" target="_blank" class="contact-link primary">💼 LinkedIn Profile</a>
+    <a href="mailto:manjunathpopuri2@gmail.com" class="contact-link">✉️ Send Email</a>
+    <a href="https://github.com/mpopuri2" target="_blank" class="contact-link">🐙 GitHub</a>
+    <a href="Manjunath_Popuri.pdf" target="_blank" class="contact-link" download="Manjunath_Popuri_Resume">📄 Download CV</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2026 <span>Manjunath Popuri</span> · Built with code &amp; ambition</div>
+  <div class="footer-copy">MS CS (AI) @ <span>Binghamton University</span> · Ex-<span>Cognizant</span></div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-domain" id="modalDomain"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Overview</div>
+        <p class="modal-desc" id="modalDesc"></p>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Key Highlights</div>
+        <ul class="modal-highlights" id="modalHighlights"></ul>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Tech Stack</div>
+        <div class="modal-stack" id="modalStack"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DYNAMIC DURATION ──────────────────────────────────────────────────────────
+(function () {
+  var start = new Date(2025, 6, 1); // July 2025  (month is 0-indexed)
+
+  function calcDuration() {
+    var now    = new Date();
+    var months = (now.getFullYear() - start.getFullYear()) * 12
+               + (now.getMonth()    - start.getMonth());
+
+    // If we haven't yet passed the start day in the current month, subtract 1
+    if (now.getDate() < start.getDate()) months--;
+    if (months < 0) months = 0;
+
+    var years     = Math.floor(months / 12);
+    var remMonths = months % 12;
+
+    var result = '';
+    if (years > 0)     result += years + ' yr'  + (years > 1 ? 's' : '') + ' ';
+    if (remMonths > 0) result += remMonths + ' mo';
+    if (months === 0)  result = '< 1 mo';
+
+    var el = document.getElementById('exp-duration');
+    if (el) el.textContent = result;
+  }
+
+  calcDuration(); // run immediately on page load
+})();
+// ─────────────────────────────────────────────────────────────────────────────
+
+// CURSOR
+var curDot  = document.getElementById('cur-dot');
+var curRing = document.getElementById('cur-ring');
+var mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+(function tick() {
+  rx += (mx - rx) * .13; ry += (my - ry) * .13;
+  curDot.style.left  = mx + 'px'; curDot.style.top  = my + 'px';
+  curRing.style.left = rx + 'px'; curRing.style.top = ry + 'px';
+  requestAnimationFrame(tick);
+})();
+document.querySelectorAll('a,button,.project-card,.exp-item,.skill-group,.edu-card,.cert-card').forEach(function (el) {
+  el.addEventListener('mouseenter', function () { document.body.classList.add('hov'); });
+  el.addEventListener('mouseleave', function () { document.body.classList.remove('hov'); });
+});
+
+// PARTICLE CANVAS
+(function () {
+  var c = document.getElementById('bg-canvas'), ctx = c.getContext('2d');
+  var W, H;
+  function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  var cols = ['rgba(0,255,157,', 'rgba(0,200,255,', 'rgba(168,85,247,'];
+  function Node() {
+    this.x  = Math.random() * W; this.y  = Math.random() * H;
+    this.vx = (Math.random() - .5) * .25; this.vy = (Math.random() - .5) * .25;
+    this.r  = Math.random() * 1.8 + .4;
+    this.col = cols[Math.floor(Math.random() * cols.length)];
+  }
+  Node.prototype.update = function () {
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > W) this.vx *= -1;
+    if (this.y < 0 || this.y > H) this.vy *= -1;
+  };
+  Node.prototype.draw = function () {
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = this.col + '0.7)'; ctx.fill();
+  };
+  var nodes = [];
+  for (var i = 0; i < 80; i++) nodes.push(new Node());
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].update(); nodes[i].draw();
+      for (var j = i + 1; j < nodes.length; j++) {
+        var dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y, d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 140) {
+          ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = 'rgba(0,255,157,' + (1 - d / 140) * .07 + ')'; ctx.lineWidth = .6; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// SCROLL REVEAL
+var obs = new IntersectionObserver(function (entries) {
+  entries.forEach(function (e) {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); });
+
+// SKILL BARS
+var barObs = new IntersectionObserver(function (entries) {
+  entries.forEach(function (e) {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.skill-bar-fill[data-width]').forEach(function (b) { b.style.width = b.dataset.width + '%'; });
+      barObs.unobserve(e.target);
+    }
+  });
+}, { threshold: .3 });
+document.querySelectorAll('.about-card').forEach(function (el) { barObs.observe(el); });
+
+// MODAL DATA
+var projects = {
+  1: { health: false, domain: 'Finance', title: 'Financial Risk & Fraud Detection System',
+    desc: 'End-to-end fraud intelligence platform trained on 10M+ financial transactions - combining supervised classification, anomaly detection, and a RAG-enabled generative AI layer for real-time financial analysis.',
+    highlights: ['92% classification accuracy across 10M+ transaction records', '+12% improvement in fraud recall over baseline models', 'RAG-enabled GenAI layer for contextual financial analysis', 'Responsible AI techniques reduced loan-approval bias by 15%', 'Deployed on Azure ML with Docker containerization and CI/CD'],
+    stack: ['Python', 'PyTorch', 'XGBoost', 'Azure ML', 'Docker', 'LLMs', 'RAG', 'SQL', 'Tableau'] },
+  2: { health: true, domain: 'Healthcare', title: 'Clinical Chart Review Assistant (RAG + LLM)',
+    desc: 'Production-grade RAG pipeline using FLAN-T5, Phi-3, and ClinicalBERT (PEFT/LoRA) to auto-generate SOAP summaries and flag medication safety issues - reducing hallucination rate by 40%.',
+    highlights: ['40% reduction in hallucination rate via retrieval-augmented grounding', 'Auto-generates SOAP note summaries from unstructured clinical text', 'PEFT/LoRA fine-tuning on ClinicalBERT for domain adaptation', 'Real-time medication safety flagging with audit trail support', 'Deployed on AWS SageMaker with FastAPI + Streamlit interface'],
+    stack: ['Python', 'PyTorch', 'HuggingFace', 'FLAN-T5', 'ClinicalBERT', 'LangChain', 'ChromaDB', 'SageMaker', 'FastAPI', 'Streamlit'] },
+  3: { health: false, domain: 'Finance', title: 'Customer Churn Prediction & Personalization Engine',
+    desc: 'Churn-prediction system built on 500K+ customer records using advanced feature engineering and ensemble methods. Reduced modeled churn risk by 12% with personalization-driven insights.',
+    highlights: ['Trained on 500K+ customer records with advanced feature engineering', '12% reduction in modeled churn risk through ensemble predictions', 'Personalization signals surfaced for downstream recommendation systems', 'Interactive Power BI dashboards for real-time stakeholder reporting', 'XGBoost + Scikit-learn pipeline with full cross-validation'],
+    stack: ['Python', 'Scikit-learn', 'XGBoost', 'Pandas', 'SQL', 'Power BI', 'Tableau'] },
+  4: { health: true, domain: 'Healthcare', title: 'GenAI Clinical Summarization & Compliance Engine',
+    desc: 'PPO-based RL pipeline with toxicity-aware rewards enforcing HIPAA compliance in LLM-generated clinical summaries - achieving zero policy violations across 10K test documents.',
+    highlights: ['Zero HIPAA policy violations across 10,000 test clinical documents', 'PPO reinforcement learning with toxicity and compliance reward shaping', 'LLM outputs grounded and constrained via LangChain + ChromaDB', 'Applicable to RADV audit documentation generation at scale', 'Deployed on AWS SageMaker with full experiment tracking'],
+    stack: ['Python', 'PyTorch', 'HuggingFace', 'LangChain', 'AWS SageMaker', 'ChromaDB', 'RL / PPO'] },
+  5: { health: false, domain: 'Finance', title: 'Autonomous Trading Agent - Reinforcement Learning',
+    desc: 'DQN-based RL agent achieving +15% return over baselines in rigorous backtesting. Deployed as a FastAPI REST API on AWS - demonstrating RL applied to sequential decision-making.',
+    highlights: ['+15% return over rule-based and buy-and-hold baselines in backtesting', 'DQN architecture with experience replay and target network stabilization', 'REST API deployed on AWS EC2 via FastAPI for real-time inference', 'Docker containerized for reproducible, portable deployment', 'OpenAI Gym environment for training simulation and evaluation'],
+    stack: ['Python', 'PyTorch', 'TensorFlow', 'OpenAI Gym', 'FastAPI', 'Docker', 'AWS'] },
+  6: { health: true, domain: 'Healthcare', title: 'Patient Outcome Prediction & Cohort Segmentation',
+    desc: 'LSTM/GRU discharge readiness models combined with K-Means cohort stratification across 6 patient segments - improving hospital resource planning accuracy by 18%.',
+    highlights: ['18% improvement in hospital resource planning accuracy', 'LSTM/GRU time-series models for discharge readiness prediction', 'K-Means segmentation across 6 clinically distinct patient cohorts', 'Full MLflow experiment tracking for reproducibility and auditability', 'Tableau dashboards for clinical operations reporting'],
+    stack: ['PyTorch', 'TensorFlow', 'LSTM / GRU', 'Pandas', 'AWS SageMaker', 'MLflow', 'Tableau'] },
+  7: { health: true, domain: 'Healthcare', title: 'Medical Imaging Classification - Computer Vision',
+    desc: 'ResNet/MobileNetV3 models classifying X-ray and MRI abnormalities at 92% accuracy, deployed via MLflow and Docker for real-time clinical inference with PySpark preprocessing.',
+    highlights: ['92% classification accuracy on X-ray and MRI abnormality detection', 'ResNet and MobileNetV3 architectures with transfer learning', 'PySpark preprocessing pipeline for production-scale imaging volumes', 'MLflow model registry + Docker for versioned, reproducible deployment', 'Real-time inference API bridging research-quality CV with clinical use'],
+    stack: ['PyTorch', 'TensorFlow', 'OpenCV', 'ResNet', 'MobileNetV3', 'PySpark', 'MLflow', 'Docker'] }
+};
+
+var overlay = document.getElementById('modalOverlay');
+var modal   = document.getElementById('modal');
+var mClose  = document.getElementById('modalClose');
+
+function openModal(id) {
+  var p = projects[id]; if (!p) return;
+  modal.className = p.health ? 'modal health' : 'modal';
+  document.getElementById('modalDomain').innerHTML     = '<span class="proj-domain ' + (p.health ? 'hlth' : 'fin') + '">' + p.domain + '</span>';
+  document.getElementById('modalTitle').textContent    = p.title;
+  document.getElementById('modalDesc').textContent     = p.desc;
+  document.getElementById('modalHighlights').innerHTML = p.highlights.map(function (h) { return '<li>' + h + '</li>'; }).join('');
+  document.getElementById('modalStack').innerHTML      = p.stack.map(function (s) { return '<span class="stack-tag">' + s + '</span>'; }).join('');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.querySelectorAll('.project-card').forEach(function (card) {
+  card.addEventListener('click', function () {
+    var num = parseInt(card.querySelector('.project-num').textContent.match(/\d+/)[0]);
+    openModal(num);
+  });
+});
+mClose.addEventListener('click', closeModal);
+overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
